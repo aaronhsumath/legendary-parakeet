@@ -44,7 +44,6 @@ sum(is.na(dataComplete[,"PS.Ratio"])
     
     
     
-    
     model2 <- lm(
       (PS.Ratio)
       ~

@@ -121,7 +121,7 @@ data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "S
   data[,"Hard.to.Show.dummy"][data[,"Vacant.dummy"] == 0] <- 1
   
   # Has there been a price drop?
-  data[,"Price.Difference"] <- data[,"Original.List.Price"] - data["List.Price"]
+  data[,"Price.Difference"] <- data[,"Original.List.Price"] - data["List.Price"] # check th is
   data[,"Price.Drop.dummy"] <- rep(0, nrow(data))
   data[,"Price.Drop.dummy"][data[,"Price.Difference"] > 0] <- 1
   data[,"Price.Difference"] <- NULL

@@ -9,4 +9,4 @@ source("functions.R")
 source("dataRead.R")
 
 
-options(scipen = 90)
+options(scipen = 7)
