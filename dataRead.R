@@ -1,3 +1,7 @@
+# Load required libraries -------------------------------------------------
+
+library(stringr)
+
 # Read data ---------------------------------------------------------------
 
 data <- read.csv("svdata.full.csv", header = TRUE)
@@ -6,6 +10,8 @@ data <- read.csv("svdata.full.csv", header = TRUE)
 # Remove Santa Clara County -----------------------------------------------
 
 data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "Sunnyvale"  ,]
+# for Sunnyvale
+# data <- data[  data[, "Postal.City"] == "Sunnyvale"  ,]
 
 
 # Generate dummy variable for whether agent is out of the area ------------
@@ -99,10 +105,10 @@ data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "S
   data[,"Possession.dummy"][data[,"COE"] == "1"] <- 1
   data[,"Possession.dummy"][data[,"Immediate"] == "1"] <- 1
   
-  # Is this a REO, etc.?
-  data[,"REO.dummy"] <- rep(0, nrow(data))
-  data[,"REO.dummy"][data[,"Additional.Listing.Info"] != "Not Applicable"] <- 1
-  
+#   # Is this a REO, etc.?
+#   data[,"REO.dummy"] <- rep(0, nrow(data))
+#   data[,"REO.dummy"][data[,"Additional.Listing.Info"] != "Not Applicable"] <- 1
+#   
   # Is the house occupied?
   data[,"Vacant.dummy"] <- rep(NA, nrow(data))
   data[,"Vacant.dummy"][data[,"Occupied.By"] == "Owner"] <- 0
@@ -121,7 +127,7 @@ data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "S
   data[,"Hard.to.Show.dummy"][data[,"Vacant.dummy"] == 0] <- 1
   
   # Has there been a price drop?
-  data[,"Price.Difference"] <- data[,"Original.List.Price"] - data["List.Price"] # check th is
+  data[,"Price.Difference"] <- data[,"Original.List.Price"] - data["List.Price"] # check this
   data[,"Price.Drop.dummy"] <- rep(0, nrow(data))
   data[,"Price.Drop.dummy"][data[,"Price.Difference"] > 0] <- 1
   data[,"Price.Difference"] <- NULL
@@ -167,4 +173,15 @@ data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "S
 # Create price/sqft ratio -------------------------------------------------
 
   data[,"PS.Ratio"] <- data[,"Sale.Price"] / data[,"Sq.Ft.Total"]
+
+
+# Delete rows missing Sale.Price or Sq.Ft.Total ---------------------------
+
+dataComplete <- data
+dataComplete[,"PS.Ratio"][which(is.nan(dataComplete[,"PS.Ratio"]))] <- NA
+dataComplete[,"PS.Ratio"][which(dataComplete[,"PS.Ratio"] == Inf)] <- NA
+dataComplete <- dataComplete[complete.cases(dataComplete[,"PS.Ratio"]),]
   
+
+sum(is.na(data[,"PS.Ratio"]))
+sum(is.na(dataComplete[,"PS.Ratio"])

@@ -1,11 +1,8 @@
-dataComplete <- data
-dataComplete[,"PS.Ratio"][which(is.nan(dataComplete[,"PS.Ratio"]))] <- NA
-dataComplete[,"PS.Ratio"][which(dataComplete[,"PS.Ratio"] == Inf)] <- NA
-dataComplete <- dataComplete[complete.cases(dataComplete[,"PS.Ratio"]),]
 
 
 model <- lm(
-  (.0001 * Sale.Price)
+  # (.0001 * Sale.Price)
+  Sale.Price
   ~
     Postal.City +
     Sq.Ft.Total +
@@ -27,8 +24,6 @@ model <- lm(
 )
 summary(model)
 
-sum(is.na(data[,"PS.Ratio"])
-sum(is.na(dataComplete[,"PS.Ratio"])
 
     
     
