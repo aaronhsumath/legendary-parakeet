@@ -1,17 +1,15 @@
-# Load required libraries -------------------------------------------------
 
-library(stringr)
-
-# Read data ---------------------------------------------------------------
-
-data <- read.csv("svdata.full.csv", header = TRUE)
+# Read new data -----------------------------------------------------------
+# data <- read.csv("svdata.full.csv", header = TRUE)
+# save(data, file = "svdata.full.RData")
 
 
-# Remove Santa Clara County -----------------------------------------------
+# Read existing data ---------------------------------------------------------------
+load("svdata.full.RData")
 
-data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "Sunnyvale"  ,]
-# for Sunnyvale
-# data <- data[  data[, "Postal.City"] == "Sunnyvale"  ,]
+# Select data of interest -----------------------------------------------
+# data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "Sunnyvale" & data[, "Postal.City"] != "Atherton" & data[, "Postal.City"] != "Woodside" & data[, "Postal.City"] != "Los Altos Hills" & data[, "Postal.City"] != "Portola Valley" ,]
+# data <- subset(data, Postal.City == "Sunnyvale")
 
 
 # Generate dummy variable for whether agent is out of the area ------------
@@ -29,11 +27,12 @@ data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "S
   # If either is a 1, generate a 1
   data[,"Out.Of.Area.Agent"] <- (data[,"Out.Of.Area.Agent1"] == TRUE | data[,"Out.Of.Area.Agent2"] == TRUE)
   
-  # Remove intermediary variables
+  # Clean up
   rm(areacode, areacode2)
   data[,"Out.Of.Area.Agent1"] <- NULL
   data[,"Out.Of.Area.Agent2"] <- NULL
-  
+#   data[,"List.Office.Phone"] <- NULL
+#   data[,"List.Agent.Direct.Work.Phone"] <- NULL
 
 # Convert date columns into date format (year, month, dow) ----------------
 
@@ -56,11 +55,12 @@ data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "S
     data[, foo] <- weekdays(data[,i])
   }
 
+
   
 # Generate first kDigits digits of listing agent license number -----------
 
   # Define kDigits = how many leading digits of license number to use
-  kDigits = 5
+  kDigits = 8
   
   # Pad license numbers with zeroes and convert to factors
   data[,"List.Agent.Lic.."] <- as.factor(str_pad(data[,"List.Agent.Lic.."], 8, pad = "0"))
@@ -86,6 +86,8 @@ data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "S
   for (i in 1:nrow(data)) {
     if (data[i,"Commission"] > 100 & !is.na(data[i, "Commission"])) {
       data[i,"Commission"] <- as.numeric(data[i,"Commission"]) / as.numeric(data[i,"Sale.Price"])
+      # data[i,"Commission"] <- NULL
+      
     }
   }
 
@@ -99,11 +101,11 @@ data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "S
   
 
 # Process dummy variables -------------------------------------------------
-
-  # Is possession immediate?
-  data[,"Possession.dummy"] <- rep(0, nrow(data))
-  data[,"Possession.dummy"][data[,"COE"] == "1"] <- 1
-  data[,"Possession.dummy"][data[,"Immediate"] == "1"] <- 1
+# 
+#   # Is possession immediate?
+#   data[,"Possession.dummy"] <- rep(0, nrow(data))
+#   data[,"Possession.dummy"][data[,"COE"] == "1"] <- 1
+#   data[,"Possession.dummy"][data[,"Immediate"] == "1"] <- 1
   
 #   # Is this a REO, etc.?
 #   data[,"REO.dummy"] <- rep(0, nrow(data))
@@ -146,11 +148,19 @@ data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "S
   data[,"Public.Death"] <- rep(0, nrow(data))
   data[,"Public.Death"][grep("DEATH", data[,"Public.Remarks"])] <- 1
   data[,"Public.Death"][grep("PASSED AWAY", data[,"Public.Remarks"])] <- 1
+  data[,"Public.Death"][grep("DECEASED", data[,"Public.Remarks"])] <- 1
+  data[,"Public.Death"][grep("DIED", data[,"Public.Remarks"])] <- 1
+  # data[,"Public.Death"][grep("PEACE", data[,"Public.Remarks"])] <- 1
+  # data[,"Public.Death"][grep("NATURAL", data[,"Public.Remarks"])] <- 1
   
   # Find "death" and "passed away" in agent remarks
-  data[,"Agent.Death"] <- rep(0, nrow(data))
-  data[,"Agent.Death"][grep("DEATH", data[,"Agent.Remarks"])] <- 1
-  data[,"Agent.Death"][grep("PASSED AWAY", data[,"Agent.Remarks"])] <- 1
+  data[,"Public.Death"] <- rep(0, nrow(data))
+  data[,"Public.Death"][grep("DEATH", data[,"Agent.Remarks"])] <- 1
+  data[,"Public.Death"][grep("PASSED AWAY", data[,"Agent.Remarks"])] <- 1
+  data[,"Public.Death"][grep("DECEASED", data[,"Agent.Remarks"])] <- 1
+  data[,"Public.Death"][grep("DIED", data[,"Agent.Remarks"])] <- 1
+  # data[,"Public.Death"][grep("PEACE", data[,"Agent.Remarks"])] <- 1
+  # data[,"Public.Death"][grep("NATURAL", data[,"Agent.Remarks"])] <- 1
   
   
 # Classify photo count ----------------------------------------------------
@@ -174,6 +184,13 @@ data <- data[ data[, "Postal.City"] != "Cupertino" & data[, "Postal.City"] != "S
 
   data[,"PS.Ratio"] <- data[,"Sale.Price"] / data[,"Sq.Ft.Total"]
 
+  
+
+# Clean up ----------------------------------------------------------------
+rm(kDateVariables)
+rm(kDigits)
+rm(i)
+rm(foo)
 
 # Delete rows missing Sale.Price or Sq.Ft.Total ---------------------------
 
@@ -184,4 +201,4 @@ dataComplete <- dataComplete[complete.cases(dataComplete[,"PS.Ratio"]),]
   
 
 sum(is.na(data[,"PS.Ratio"]))
-sum(is.na(dataComplete[,"PS.Ratio"])
+sum(is.na(dataComplete[,"PS.Ratio"]))
