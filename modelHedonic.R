@@ -15,6 +15,7 @@ model <- lm(
     Postal.City +
     Age +
     Sq.Ft.Total +
+    Sq.Ft.Total^2
     Lot.Size +
     Out.Of.Area.Agent +
     List.Agent.Lic.leading +
