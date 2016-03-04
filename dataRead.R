@@ -162,7 +162,14 @@ load("svdata.full.RData")
   # data[,"Public.Death"][grep("PEACE", data[,"Agent.Remarks"])] <- 1
   # data[,"Public.Death"][grep("NATURAL", data[,"Agent.Remarks"])] <- 1
   
+
+  # Is the house staged?
+  data[,"Staged"] <- rep(0, nrow(data))
+  data[,"Staged"][grep("STAG", data[,"Agent.Remarks"])] <- 1
+  data[,"Staged"][grep("STAG", data[,"Public.Remarks"])] <- 1
   
+  
+    
 # Classify photo count ----------------------------------------------------
 
   # Create bins for photo count
