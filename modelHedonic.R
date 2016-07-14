@@ -6,6 +6,8 @@ complete <- data[complete.cases(data$Photo.Count, data$Public.Death, data$Price.
                                 data$Sale.Price),]    
 complete = subset(complete, Postal.City %in% c("Los Altos", "Menlo Park", "Mountain View", "Palo Alto", "Redwood City", "Redwood Shores"))
 
+complete[, "Sq.Ft.Total.Sq"] = data[, "Sq.Ft.Total"]^2
+
 model <- lm(
   # (.0001 * Sale.Price)
   Sale.Price
@@ -15,7 +17,7 @@ model <- lm(
     Postal.City +
     Age +
     Sq.Ft.Total +
-    Sq.Ft.Total^2
+    Sq.Ft.Total.Sq +
     Lot.Size +
     Out.Of.Area.Agent +
     List.Agent.Lic.leading +
